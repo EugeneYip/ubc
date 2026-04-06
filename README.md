@@ -1,4 +1,4 @@
-# page-starter
+# Uber in China Mainland Region
 > if.eugeneyip.com
 
 A lightweight template repository for publishing LLM generated JSX pages with minimal setup.
