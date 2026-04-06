@@ -233,6 +233,437 @@ function CityNetworkFigure({ mode }) {
   );
 }
 
+
+function BattlefieldAtlas({ mode }) {
+  const [layer, setLayer] = useState("all");
+  const [focus, setFocus] = useState("didi");
+
+  const layerOptions = [
+    { key: "all", en: "All channels", zh: "全部通道" },
+    { key: "capital", en: "Capital", zh: "資本" },
+    { key: "distribution", en: "Social distribution", zh: "社交流量" },
+    { key: "payments", en: "Payments", zh: "支付" },
+    { key: "maps", en: "Maps and search", zh: "地圖與搜尋" },
+    { key: "regulation", en: "Regulation", zh: "監管" },
+    { key: "alliances", en: "Alliances", zh: "聯盟" },
+  ];
+
+  const focusOptions = [
+    { key: "uber", en: "Uber", zh: "Uber" },
+    { key: "didi", en: "Didi-Kuaidi", zh: "滴滴快的" },
+    { key: "tencent", en: "Tencent", zh: "騰訊" },
+    { key: "alibaba", en: "Alibaba", zh: "阿里巴巴" },
+    { key: "baidu", en: "Baidu", zh: "百度" },
+  ];
+
+  const nodes = {
+    baidu: { x: 54, y: 56, w: 132, h: 52, tone: "baidu", labelEn: "Baidu", labelZh: "百度", subEn: "capital + search ally", subZh: "資本與搜尋盟友" },
+    baidumaps: { x: 54, y: 132, w: 132, h: 52, tone: "baidu", labelEn: "Baidu Maps", labelZh: "百度地圖", subEn: "map layer", subZh: "地圖層" },
+    uber: { x: 134, y: 248, w: 148, h: 58, tone: "uber", labelEn: "Uber", labelZh: "Uber", subEn: "global entrant", subZh: "全球進入者" },
+    tencent: { x: 426, y: 56, w: 132, h: 52, tone: "tencent", labelEn: "Tencent", labelZh: "騰訊", subEn: "capital + platform power", subZh: "資本與平臺力量" },
+    wechat: { x: 426, y: 132, w: 132, h: 52, tone: "wechat", labelEn: "WeChat", labelZh: "微信", subEn: "social distribution", subZh: "社交流量分發" },
+    alibaba: { x: 616, y: 56, w: 132, h: 52, tone: "alibaba", labelEn: "Alibaba", labelZh: "阿里巴巴", subEn: "capital + commerce", subZh: "資本與電商" },
+    alipay: { x: 616, y: 132, w: 132, h: 52, tone: "alipay", labelEn: "Alipay", labelZh: "支付寶", subEn: "payment rail", subZh: "支付通道" },
+    didi: { x: 500, y: 248, w: 174, h: 58, tone: "didi", labelEn: "Didi-Kuaidi", labelZh: "滴滴快的", subEn: "local platform bloc", subZh: "本地平臺集團" },
+    gov: { x: 292, y: 356, w: 200, h: 58, tone: "neutral", labelEn: "Local governments + taxi system", labelZh: "地方政府與計程車體系", subEn: "permits, enforcement, incumbency", subZh: "許可、執法、在位優勢" },
+    alliance: { x: 556, y: 356, w: 192, h: 58, tone: "neutral", labelEn: "Lyft / Ola / Grab alliance", labelZh: "Lyft / Ola / Grab 聯盟", subEn: "external containment", subZh: "外部圍堵" },
+  };
+
+  const toneFill = {
+    uber: PALETTE.uber,
+    didi: PALETTE.didi,
+    tencent: PALETTE.tencent,
+    alibaba: PALETTE.alibaba,
+    baidu: PALETTE.baidu,
+    wechat: PALETTE.wechat,
+    alipay: PALETTE.alipay,
+    neutral: PALETTE.teal,
+  };
+
+  const nodeCenters = Object.fromEntries(
+    Object.entries(nodes).map(([key, n]) => [key, { x: n.x + n.w / 2, y: n.y + n.h / 2 }])
+  );
+
+  const layerColors = {
+    rivalry: PALETTE.inkSoft,
+    capital: PALETTE.plum,
+    distribution: PALETTE.green,
+    payments: PALETTE.blue,
+    maps: PALETTE.rust,
+    regulation: PALETTE.red,
+    alliances: PALETTE.gold,
+  };
+
+  const edges = [
+    { from: "uber", to: "didi", type: "rivalry", labelEn: "core ride-hailing war", labelZh: "叫車主戰場", lx: 382, ly: 234, curveX: 0, curveY: -72 },
+    { from: "baidu", to: "uber", type: "capital", labelEn: "$600M investment", labelZh: "6 億美元投資", lx: 140, ly: 198, curveX: 22, curveY: 46 },
+    { from: "tencent", to: "didi", type: "capital", labelEn: "backing + reach", labelZh: "投資與流量", lx: 492, ly: 200, curveX: -8, curveY: 42 },
+    { from: "alibaba", to: "didi", type: "capital", labelEn: "Kuaidi side backing", labelZh: "快的一側資本", lx: 668, ly: 204, curveX: -10, curveY: 48 },
+    { from: "wechat", to: "didi", type: "distribution", labelEn: "native distribution", labelZh: "原生社交流量", lx: 486, ly: 236, curveX: 4, curveY: 36 },
+    { from: "wechat", to: "uber", type: "distribution", labelEn: "blocked Uber accounts", labelZh: "封鎖 Uber 帳號", lx: 308, ly: 168, curveX: -86, curveY: -26, negative: true },
+    { from: "alipay", to: "didi", type: "payments", labelEn: "payment convenience", labelZh: "支付便利", lx: 630, ly: 236, curveX: -18, curveY: 32 },
+    { from: "alipay", to: "uber", type: "payments", labelEn: "Uber added it", labelZh: "Uber 後來接入", lx: 366, ly: 128, curveX: -138, curveY: -74, dashed: true },
+    { from: "baidumaps", to: "uber", type: "maps", labelEn: "critical local map fix", labelZh: "修補地圖弱點", lx: 140, ly: 220, curveX: 12, curveY: 24 },
+    { from: "baidumaps", to: "didi", type: "maps", labelEn: "available to locals too", labelZh: "本地對手也可用", lx: 356, ly: 118, curveX: 94, curveY: -96, dashed: true },
+    { from: "gov", to: "didi", type: "regulation", labelEn: "permits + taxi embed", labelZh: "許可與體系嵌入", lx: 476, ly: 342, curveX: 42, curveY: -16 },
+    { from: "gov", to: "uber", type: "regulation", labelEn: "raids + draft rules", labelZh: "查緝與法規草案", lx: 258, ly: 336, curveX: -30, curveY: -14, negative: true },
+    { from: "didi", to: "alliance", type: "alliances", labelEn: "Lyft / Ola / Grab linkage", labelZh: "Lyft / Ola / Grab 串聯", lx: 664, ly: 332, curveX: 32, curveY: 8 },
+  ];
+
+  const layerSummary = {
+    all: {
+      en: "The asymmetry came from stacked channels. Didi sat closer to local density, social distribution, payment convenience, and regulatory legitimacy at the same time.",
+      zh: "真正的不對稱，不是單一優勢，而是多條通道同時堆疊。滴滴同時更靠近地方密度、社交流量、支付便利與監管正當性。",
+    },
+    capital: {
+      en: "Uber had meaningful capital support, but capital alone did not neutralize local incumbency once Didi and Kuaidi merged.",
+      zh: "Uber 並非沒有資本支援，但當滴滴與快的合併後，資本本身已不足以抹平本地在位優勢。",
+    },
+    distribution: {
+      en: "Super-app distribution mattered because ride hailing is frequent, local, and habit-forming. WeChat was not just media. It was a usage rail.",
+      zh: "超級 App 分發很重要，因為叫車是高頻、地方性且會養成習慣的行為。微信不只是媒體，而是使用通道。",
+    },
+    payments: {
+      en: "Payment friction shapes conversion and repeat use. Adding Alipay helped Uber, but native local payment embed still favored the local bloc.",
+      zh: "支付摩擦會影響轉換與回流。Uber 接上支付寶當然有幫助，但原生支付嵌入仍偏向本地集團。",
+    },
+    maps: {
+      en: "Maps were necessary for usability, but they were not exclusive enough to become Uber's decisive moat. Even this channel was contested.",
+      zh: "地圖對可用性很關鍵，但它並不夠排他，無法成為 Uber 的決定性護城河。連這個通道本身也不是單邊壟斷。",
+    },
+    regulation: {
+      en: "Draft rules and permit allocation could convert temporary lead into durable structure. Regulation was not backdrop. It was a competitive instrument.",
+      zh: "法規草案與許可分配，可能把暫時優勢轉成長期結構。監管不是背景音，而是競爭工具。",
+    },
+    alliances: {
+      en: "The mainland war was nested inside a broader anti-Uber geometry. Didi did not need to beat Uber everywhere by itself if it could help constrain Uber globally.",
+      zh: "大陸戰場其實嵌在更大的反 Uber 幾何裡。只要能在全球幫忙牽制 Uber，滴滴就不必獨自到處正面決戰。",
+    },
+  };
+
+  const focusDetails = {
+    uber: {
+      titleEn: "Uber",
+      titleZh: "Uber",
+      roleEn: "Serious entrant, but structurally thinner local system.",
+      roleZh: "有實力的進入者，但本地系統仍較薄。",
+      bulletsEn: [
+        "Localized more than casual summaries admit: Alipay, Baidu Maps, local servers, People's Uber, and fast city expansion.",
+        "Still entered with narrower service scope and weaker embed in local complements than Didi-Kuaidi.",
+        "Could buy growth, but not instantly buy local legitimacy, taxi relationships, or policy alignment.",
+      ],
+      bulletsZh: [
+        "在地化其實比很多人以為的多，包括支付寶、百度地圖、境內伺服器、人民優步與快速擴城。",
+        "但相較滴滴快的，服務範圍仍較窄，對本地補充生態系的嵌入也較弱。",
+        "可以花錢買成長，但不能立刻買到制度正當性、計程車關係與政策對位。",
+      ],
+    },
+    didi: {
+      titleEn: "Didi-Kuaidi",
+      titleZh: "滴滴快的",
+      roleEn: "Local bloc with density, breadth, and institutional embed.",
+      roleZh: "同時掌握密度、廣度與制度嵌入的本地集團。",
+      bulletsEn: [
+        "The merger reduced local self-cannibalization and concentrated network density city by city.",
+        "Started from licensed taxis, then expanded across broader service lines, making the product more locally complete.",
+        "Its strongest advantage was not one feature. It was the bundle: density, complements, permits, and local familiarity together.",
+      ],
+      bulletsZh: [
+        "合併把原本本地雙雄彼此內耗的問題壓下去，地方網路密度也因此集中。",
+        "先從持照計程車起家，再擴張到更廣服務線，讓產品更完整地貼近本地需求。",
+        "最強的地方不是單一功能，而是密度、補充資源、許可與在地熟悉度的整體組合。",
+      ],
+    },
+    tencent: {
+      titleEn: "Tencent",
+      titleZh: "騰訊",
+      roleEn: "Capital plus a habit rail through WeChat.",
+      roleZh: "不只是資本，更透過微信掌握高頻使用通道。",
+      bulletsEn: [
+        "WeChat functioned as a distribution and payment environment, not merely an ad channel.",
+        "Blocking Uber-related accounts mattered because discovery and convenient re-use are central in ride hailing.",
+        "This is why the battle was partly a platform-on-platform war, not just car dispatch competition.",
+      ],
+      bulletsZh: [
+        "微信不是單純廣告渠道，而是同時承載分發與支付的使用環境。",
+        "封鎖 Uber 相關帳號之所以重要，是因為叫車高度依賴發現、轉換與再次使用。",
+        "也因此，這場戰爭一部分其實是平臺對平臺，而不只是派車效率競爭。",
+      ],
+    },
+    alibaba: {
+      titleEn: "Alibaba",
+      titleZh: "阿里巴巴",
+      roleEn: "Payment power and backing on the Kuaidi side.",
+      roleZh: "在快的一側提供資本與支付力量。",
+      bulletsEn: [
+        "Alipay mattered because payment convenience is part of value delivery, not a trivial back-office feature.",
+        "The local bloc did not depend on one giant alone. It drew strength from multiple complements across the ecosystem.",
+        "After merger, Alibaba's relevance remained because the payment rail still mattered for adoption and retention.",
+      ],
+      bulletsZh: [
+        "支付寶之所以重要，是因為支付便利本身就是價值傳遞的一部分，不是後台小細節。",
+        "本地集團不是只靠單一巨頭，而是同時吸收多種生態系補充資源。",
+        "合併之後，阿里巴巴仍然重要，因為支付通道會直接影響採用與留存。",
+      ],
+    },
+    baidu: {
+      titleEn: "Baidu",
+      titleZh: "百度",
+      roleEn: "Meaningful ally for Uber, but not enough by itself.",
+      roleZh: "對 Uber 很重要，但單靠它仍然不夠。",
+      bulletsEn: [
+        "Baidu gave Uber capital, search adjacency, and a local map fix at a moment when Google Maps was weak in the mainland.",
+        "That support made Uber more viable, but it did not close the distribution and payment gap to the Tencent-Alibaba local bloc.",
+        "This is exactly why maps alone should not be overstated into a decisive moat story.",
+      ],
+      bulletsZh: [
+        "百度替 Uber 補上資本、搜尋相鄰性，以及 Google 地圖在大陸較弱時的本地地圖修補。",
+        "這確實提升了 Uber 的可行性，但仍不足以補齊對騰訊與阿里本地集團的分發與支付差距。",
+        "所以地圖不能被誇大解讀成決定性的單一護城河。",
+      ],
+    },
+    gov: {
+      titleEn: "Regulators and taxi incumbents",
+      titleZh: "監管者與計程車在位體系",
+      roleEn: "The channel that could harden local advantage into law.",
+      roleZh: "最可能把本地優勢直接做成法律結構的通道。",
+      bulletsEn: [
+        "Permits, raids, labor treatment, pricing rules, and single-platform rules all shaped platform economics directly.",
+        "Didi's local embed made regulation look less like neutral governance and more like competitive structure.",
+        "In this case, law could freeze affiliation, pricing, and participation rules in ways harmful to Uber's core tactics.",
+      ],
+      bulletsZh: [
+        "許可、查緝、勞動認定、價格規則與單一平臺規定，都會直接改變平臺經濟。",
+        "滴滴較深的本地嵌入，使監管看起來不像中性治理，而更像競爭結構的一部分。",
+        "在這個個案裡，法律可能直接把 Uber 最重要的戰術空間固定住。",
+      ],
+    },
+    alliance: {
+      titleEn: "Anti-Uber Alliance",
+      titleZh: "反 Uber 聯盟",
+      roleEn: "External geometry that raised Uber's strategic stakes.",
+      roleZh: "把 Uber 戰略風險進一步放大的外部幾何。",
+      bulletsEn: [
+        "Didi's investments into Lyft, Ola, and Grab meant the mainland conflict also affected Uber's global category leadership story.",
+        "The issue was not only local market share. It was also whether Uber would be boxed in across regions.",
+        "That made China feel even more important at the case moment than later hindsight might suggest.",
+      ],
+      bulletsZh: [
+        "滴滴投資 Lyft、Ola、Grab，代表大陸衝突也會反過來影響 Uber 的全球品類領導敘事。",
+        "問題不只是本地市佔，而是 Uber 是否會在多個區域同時被圍堵。",
+        "因此站在個案當下，大陸市場看起來會比後見之明下更加關鍵。",
+      ],
+    },
+    wechat: {
+      titleEn: "WeChat",
+      titleZh: "微信",
+      roleEn: "Habit channel for discovery, messaging, and reuse.",
+      roleZh: "承接發現、溝通與再使用的習慣通道。",
+      bulletsEn: ["Traffic inside a super app can be strategic infrastructure, not merely promotion.", "When the app rail is blocked, a rival loses more than impressions.", "This favored Didi because it sat closer to native local usage patterns."],
+      bulletsZh: ["超級 App 內的流量，本質上可能是戰略基礎設施，不只是宣傳。", "當這條通道被封鎖，對手失去的不只是曝光。", "這讓更貼近本地使用習慣的滴滴受益。"],
+    },
+    alipay: {
+      titleEn: "Alipay",
+      titleZh: "支付寶",
+      roleEn: "Conversion and retention rail through payment convenience.",
+      roleZh: "透過支付便利影響轉換與留存的基礎通道。",
+      bulletsEn: ["Payment is part of the product experience in ride hailing.", "Uber's addition of Alipay was necessary, but not the same as owning the native rail.", "The local bloc entered this layer with greater natural fit."],
+      bulletsZh: ["支付本身就是叫車產品體驗的一部分。", "Uber 接入支付寶是必要，但不等於掌握原生支付通道。", "本地集團在這一層天生更貼近使用情境。"],
+    },
+    baidumaps: {
+      titleEn: "Baidu Maps",
+      titleZh: "百度地圖",
+      roleEn: "Necessary local infrastructure, but not fully exclusive.",
+      roleZh: "必要的本地基礎設施，但不具完全排他性。",
+      bulletsEn: ["A local map layer was essential because Google Maps coverage was weak.", "This improved Uber's usability materially.", "But because local rivals also used Baidu Maps, this channel alone could not decide the war."],
+      bulletsZh: ["由於 Google 地圖覆蓋較弱，本地地圖層是必要基礎。", "這確實實質改善了 Uber 的可用性。", "但因為本地對手也能用，單靠地圖仍不足以決定勝負。"],
+    },
+  };
+
+  const majorMatrix = {
+    uber: { capital: 5, distribution: 2, payments: 2, maps: 3, regulation: 1 },
+    didi: { capital: 5, distribution: 5, payments: 5, maps: 4, regulation: 5 },
+    tencent: { capital: 4, distribution: 5, payments: 2, maps: 1, regulation: 3 },
+    alibaba: { capital: 4, distribution: 2, payments: 5, maps: 1, regulation: 3 },
+    baidu: { capital: 3, distribution: 2, payments: 1, maps: 5, regulation: 1 },
+  };
+
+  const matrixColumns = [
+    { key: "capital", en: "Capital", zh: "資本" },
+    { key: "distribution", en: "Social", zh: "社交流量" },
+    { key: "payments", en: "Payment", zh: "支付" },
+    { key: "maps", en: "Maps", zh: "地圖" },
+    { key: "regulation", en: "Regulatory", zh: "監管" },
+  ];
+
+  const matrixDescription = {
+    en: "Interpretive heatmap. This is not a literal count of assets. It is a compact reading of relative strategic leverage in the case context.",
+    zh: "這是解釋型熱圖，不是資產逐項點數。它只是把個案情境下的相對戰略槓桿壓縮成一張短表。",
+  };
+
+  const activeDetail = focusDetails[focus] || focusDetails.didi;
+
+  const heat = (value) => ({
+    background: `rgba(46, 92, 110, ${0.08 + value * 0.11})`,
+    color: value >= 4 ? "#ffffff" : PALETTE.ink,
+    borderColor: value >= 4 ? "rgba(46, 92, 110, 0.0)" : "rgba(46, 92, 110, 0.12)",
+  });
+
+  return (
+    <div className="battle-atlas panel">
+      <div className="battle-toolbar">
+        <div className="battle-copy">
+          <strong><T mode={mode} en="Interactive battlefield atlas" zh="互動戰場圖" /></strong>
+          <p><T mode={mode} en={layerSummary[layer].en} zh={layerSummary[layer].zh} /></p>
+        </div>
+        <div className="battle-control-stack">
+          <div>
+            <div className="battle-label"><T mode={mode} en="Filter by channel" zh="依通道篩選" /></div>
+            <div className="battle-layer-row">
+              {layerOptions.map((opt) => (
+                <button key={opt.key} className={`battle-pill ${layer === opt.key ? "active" : ""}`} onClick={() => setLayer(opt.key)}>
+                  <T mode={mode} en={opt.en} zh={opt.zh} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="battle-label"><T mode={mode} en="Focus actor" zh="聚焦角色" /></div>
+            <div className="battle-focus-row">
+              {focusOptions.map((opt) => (
+                <button key={opt.key} className={`battle-pill battle-focus-pill ${focus === opt.key ? "active" : ""}`} onClick={() => setFocus(opt.key)}>
+                  <T mode={mode} en={opt.en} zh={opt.zh} />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="battle-layout">
+        <div className="battle-map-card">
+          <svg viewBox="0 0 800 450" className="battle-svg" role="img" aria-label="Battlefield relationship map for Uber and Didi in the mainland market">
+            <defs>
+              <marker id="battle-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+                <path d="M0,0 L8,4 L0,8 z" fill="#8B8175" />
+              </marker>
+            </defs>
+            <rect x="0" y="0" width="800" height="450" rx="24" fill="rgba(255,255,255,0.72)" />
+            <text x="34" y="34" fontSize="14" fontWeight="700" fill={PALETTE.ink}>{mode === "zh" ? "通道地圖" : "Channel map"}</text>
+            <text x="34" y="54" fontSize="12" fill={PALETTE.muted}>{mode === "zh" ? "可點擊節點查看。也可用篩選器單看某一條通道。" : "Click nodes to inspect. Use filters to isolate one channel."}</text>
+
+            {edges.map((edge, idx) => {
+              const from = nodeCenters[edge.from];
+              const to = nodeCenters[edge.to];
+              const visible = layer === "all" || edge.type === layer || edge.type === "rivalry";
+              const focusHit = focus === edge.from || focus === edge.to;
+              const stroke = edge.negative ? PALETTE.red : layerColors[edge.type];
+              const opacity = !visible ? 0.08 : focusHit ? 0.95 : layer === "all" ? 0.62 : 0.78;
+              const width = edge.type === "rivalry" ? 3.4 : focusHit ? 4.2 : 2.6;
+              const dash = edge.dashed ? "6 7" : edge.negative ? "9 7" : undefined;
+              const qx = (from.x + to.x) / 2 + (edge.curveX || 0);
+              const qy = (from.y + to.y) / 2 + (edge.curveY || 0);
+              const path = `M ${from.x} ${from.y} Q ${qx} ${qy} ${to.x} ${to.y}`;
+              return (
+                <g key={idx} opacity={opacity}>
+                  <path d={path} fill="none" stroke={stroke} strokeWidth={width} strokeDasharray={dash} markerEnd="url(#battle-arrow)" />
+                  {visible ? (
+                    <text x={edge.lx} y={edge.ly} fontSize="11" fontWeight="600" fill={stroke} textAnchor="middle">
+                      {mode === "zh" ? edge.labelZh : edge.labelEn}
+                    </text>
+                  ) : null}
+                </g>
+              );
+            })}
+
+            {Object.entries(nodes).map(([key, node]) => {
+              const fill = toneFill[node.tone] || PALETTE.teal;
+              const isFocus = focus === key;
+              const clickable = !!focusDetails[key];
+              const isDimmed = clickable && focus !== key && ["uber","didi","tencent","alibaba","baidu"].includes(focus) && ["uber","didi","tencent","alibaba","baidu"].includes(key) === false ? false : false;
+              return (
+                <g key={key} onClick={() => clickable ? setFocus(key) : undefined} style={clickable ? { cursor: "pointer" } : undefined}>
+                  <rect x={node.x} y={node.y} width={node.w} height={node.h} rx="18" fill={node.tone === "uber" ? fill : `${fill}18`} stroke={isFocus ? PALETTE.plum : fill} strokeWidth={isFocus ? 3 : 1.5} />
+                  {node.tone !== "uber" ? <rect x={node.x + 12} y={node.y + 13} width="10" height="10" rx="3" fill={fill} /> : null}
+                  <text x={node.tone === "uber" ? node.x + 18 : node.x + 30} y={node.y + 23} fontSize="14" fontWeight="800" fill={node.tone === "uber" ? "#ffffff" : PALETTE.ink}>{mode === "zh" ? node.labelZh : node.labelEn}</text>
+                  <text x={node.tone === "uber" ? node.x + 18 : node.x + 30} y={node.y + 42} fontSize="11" fill={node.tone === "uber" ? "rgba(255,255,255,0.82)" : PALETTE.muted}>{mode === "zh" ? node.subZh : node.subEn}</text>
+                </g>
+              );
+            })}
+          </svg>
+
+          <div className="battle-note-strip">
+            <div>
+              <strong><T mode={mode} en="How to read this" zh="閱讀方式" /></strong>
+              <p><T mode={mode} en="The decisive issue was not whether Uber had one ally. It was whether its support stack was as complete as Didi's. It was not." zh="真正關鍵不在 Uber 有沒有單一盟友，而在它的支援堆疊是否像滴滴一樣完整。答案偏向不是。" /></p>
+            </div>
+            <div className="battle-legend">
+              {[
+                ["capital", PALETTE.plum],
+                ["distribution", PALETTE.green],
+                ["payments", PALETTE.blue],
+                ["maps", PALETTE.rust],
+                ["regulation", PALETTE.red],
+                ["alliances", PALETTE.gold],
+              ].map(([name, color]) => (
+                <span key={name}><i style={{ background: color }} />{mode === "zh" ? {
+                  capital: "資本",
+                  distribution: "社交流量",
+                  payments: "支付",
+                  maps: "地圖與搜尋",
+                  regulation: "監管",
+                  alliances: "聯盟",
+                }[name] : {
+                  capital: "Capital",
+                  distribution: "Social",
+                  payments: "Payments",
+                  maps: "Maps",
+                  regulation: "Regulation",
+                  alliances: "Alliances",
+                }[name]}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="battle-side">
+          <div className="battle-focus-card">
+            <div className="battle-card-kicker"><T mode={mode} en="Selected actor" zh="目前焦點" /></div>
+            <h3>{mode === "zh" ? activeDetail.titleZh : activeDetail.titleEn}</h3>
+            <p className="battle-role">{mode === "zh" ? activeDetail.roleZh : activeDetail.roleEn}</p>
+            <ul className="appendix-list">
+              {(mode === "zh" ? activeDetail.bulletsZh : activeDetail.bulletsEn).map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="battle-matrix-card">
+            <div className="battle-card-kicker"><T mode={mode} en="Qualitative leverage matrix" zh="質性槓桿矩陣" /></div>
+            <p className="battle-matrix-copy"><T mode={mode} en={matrixDescription.en} zh={matrixDescription.zh} /></p>
+            <div className="battle-matrix-grid">
+              <div className="battle-head-empty"></div>
+              {matrixColumns.map((col) => (
+                <div key={col.key} className="battle-col-head"><T mode={mode} en={col.en} zh={col.zh} /></div>
+              ))}
+              {focusOptions.map((actor) => (
+                <React.Fragment key={actor.key}>
+                  <div className={`battle-row-head ${focus === actor.key ? "active" : ""}`}>{mode === "zh" ? actor.zh : actor.en}</div>
+                  {matrixColumns.map((col) => {
+                    const value = majorMatrix[actor.key][col.key];
+                    return <div key={`${actor.key}-${col.key}`} className={`battle-cell ${focus === actor.key ? "active" : ""}`} style={heat(value)}>{value}</div>;
+                  })}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+      <p className="source-note"><T mode={mode} en="Built from the HBS case's ecosystem facts, blocking event, local permit event, and alliance sequence. The matrix is interpretive. It compresses the case into a reader-friendly comparison rather than claiming literal measured scores." zh="本圖依據 HBS 個案中的生態系事實、微信封鎖事件、地方許可事件與聯盟擴張順序重建。矩陣部分屬解釋型視覺壓縮，用來幫助閱讀，不是在主張存在精確量測分數。" /></p>
+    </div>
+  );
+}
+
 function FloatingLanguageSwitch({ mode, setMode }) {
   const [open, setOpen] = useState(false);
   const labels = {
@@ -1095,6 +1526,191 @@ export default function UberChinaMainlandInfrastructure() {
           transition: transform 0.2s ease;
         }
         details[open] .details-arrow { transform: rotate(90deg); }
+
+        .battle-atlas {
+          display: grid;
+          gap: 16px;
+        }
+        .battle-toolbar {
+          display: flex;
+          gap: 16px;
+          align-items: flex-start;
+          justify-content: space-between;
+          flex-wrap: wrap;
+        }
+        .battle-copy {
+          display: grid;
+          gap: 6px;
+          max-width: 520px;
+        }
+        .battle-copy strong {
+          font-size: 16px;
+        }
+        .battle-copy p,
+        .battle-matrix-copy,
+        .battle-role,
+        .battle-note-strip p {
+          font-size: 14px;
+          margin: 0;
+        }
+        .battle-control-stack {
+          display: grid;
+          gap: 10px;
+          min-width: min(100%, 430px);
+        }
+        .battle-label {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: ${PALETTE.muted};
+          margin-bottom: 8px;
+          font-weight: 800;
+        }
+        .battle-layer-row,
+        .battle-focus-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+        }
+        .battle-pill {
+          border: 1px solid ${PALETTE.line};
+          background: rgba(255,255,255,0.82);
+          color: ${PALETTE.ink};
+          padding: 9px 12px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+        }
+        .battle-pill:hover {
+          transform: translateY(-1px);
+          border-color: ${PALETTE.teal};
+        }
+        .battle-pill.active {
+          background: ${PALETTE.teal};
+          border-color: ${PALETTE.teal};
+          color: #fff;
+        }
+        .battle-focus-pill.active {
+          background: ${PALETTE.plum};
+          border-color: ${PALETTE.plum};
+        }
+        .battle-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1.18fr) minmax(320px, 0.82fr);
+          gap: 16px;
+        }
+        .battle-map-card,
+        .battle-side {
+          display: grid;
+          gap: 16px;
+        }
+        .battle-svg {
+          width: 100%;
+          height: auto;
+          display: block;
+          background: rgba(255,255,255,0.55);
+          border-radius: 22px;
+          border: 1px solid ${PALETTE.line};
+        }
+        .battle-note-strip,
+        .battle-focus-card,
+        .battle-matrix-card {
+          display: grid;
+          gap: 10px;
+          padding: 14px 16px;
+          border-radius: 18px;
+          border: 1px solid ${PALETTE.line};
+          background: rgba(255,255,255,0.72);
+        }
+        .battle-card-kicker {
+          font-size: 11px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: ${PALETTE.muted};
+          font-weight: 800;
+        }
+        .battle-focus-card h3 {
+          margin: 0;
+          font-size: 22px;
+        }
+        .battle-role {
+          color: ${PALETTE.plum};
+          font-weight: 700;
+        }
+        .battle-legend {
+          display: flex;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .battle-legend span {
+          display: inline-flex;
+          gap: 6px;
+          align-items: center;
+          font-size: 12px;
+          border: 1px solid ${PALETTE.line};
+          border-radius: 999px;
+          padding: 6px 10px;
+          background: rgba(255,255,255,0.8);
+        }
+        .battle-legend i {
+          width: 10px;
+          height: 10px;
+          border-radius: 999px;
+          display: inline-block;
+        }
+        .battle-matrix-grid {
+          display: grid;
+          grid-template-columns: 1.1fr repeat(5, minmax(0, 1fr));
+          gap: 6px;
+          align-items: stretch;
+        }
+        .battle-head-empty {
+          min-height: 38px;
+        }
+        .battle-col-head,
+        .battle-row-head,
+        .battle-cell {
+          border-radius: 12px;
+          min-height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 8px;
+          border: 1px solid transparent;
+        }
+        .battle-col-head {
+          font-size: 11px;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: ${PALETTE.muted};
+          font-weight: 800;
+          background: rgba(46,92,110,0.05);
+          border-color: rgba(46,92,110,0.08);
+        }
+        .battle-row-head {
+          justify-content: flex-start;
+          font-size: 13px;
+          font-weight: 700;
+          color: ${PALETTE.ink};
+          background: rgba(255,255,255,0.78);
+          border-color: ${PALETTE.line};
+        }
+        .battle-row-head.active {
+          border-color: ${PALETTE.plum};
+          box-shadow: inset 0 0 0 1px ${PALETTE.plum};
+        }
+        .battle-cell {
+          font-size: 13px;
+          font-weight: 800;
+          border-color: rgba(46,92,110,0.12);
+        }
+        .battle-cell.active {
+          box-shadow: inset 0 0 0 1px ${PALETTE.plum};
+        }
+
         .footer-note {
           margin-top: 28px;
           padding: 16px 18px;
@@ -1430,35 +2046,24 @@ export default function UberChinaMainlandInfrastructure() {
               icon="map"
               eyebrowEn="Battlefield geometry"
               eyebrowZh="戰場幾何"
-              titleEn="This was not Uber versus one app. It was Uber versus a local system."
-              titleZh="這不是 Uber 對上一個 App，而是對上一整套本地系統"
-              introEn="Many short summaries miss the real shape of the fight. Uber was not only competing against Didi-Kuaidi. It was facing a denser local network, native complementors, and a regulatory environment moving in ways that favored local incumbency."
-              introZh="很多簡短摘要會漏掉戰場真正的形狀。Uber 不只是對上滴滴快的一家公司，而是對上更密的本地網路、原生補充生態系，以及逐漸偏向本土在位者的監管環境。"
+              titleEn="A denser battlefield map: who was connected to whom, and through what channel"
+              titleZh="更高密度的戰場圖：誰與誰相連，又是透過哪一條通道"
+              introEn="The most common weakness in case summaries is under-drawing the system. Uber was not just facing a rival app. It was facing a locally denser platform bloc wired into capital, traffic, payments, maps, and regulation at the same time."
+              introZh="個案摘要最常見的弱點，就是把整個系統畫得太薄。Uber 對上的不是單一競品 App，而是一個同時連上資本、流量、支付、地圖與監管的本地高密度平臺集團。"
             />
-            <div className="ecosystem-grid">
+            <BattlefieldAtlas mode={mode} />
+            <div className="two-col" style={{ marginTop: 16 }}>
               <div className="panel">
-                <h3 className="subhead"><Icon name="users" size={16} color={PALETTE.teal} /><T mode={mode} en="Tech giant proxy war" zh="科技巨頭代理人戰爭" /></h3>
-                <div className="chip-row" style={{ marginBottom: 12 }}>
-                  <BrandChip label="Uber" tone="uber" sublabel="global platform" />
-                  <BrandChip label="Didi" tone="didi" sublabel="local density" />
-                  <BrandChip label="Kuaidi" tone="didi" sublabel="merged with Didi" />
-                </div>
-                <div className="chip-row" style={{ marginBottom: 12 }}>
-                  <BrandChip label="Tencent" tone="tencent" sublabel="WeChat + traffic" />
-                  <BrandChip label="Alibaba" tone="alibaba" sublabel="Alipay + commerce" />
-                  <BrandChip label="Baidu" tone="baidu" sublabel="maps + search" />
-                </div>
-                <div className="chip-row">
-                  <BrandChip label="WeChat" tone="wechat" sublabel="social distribution" />
-                  <BrandChip label="Alipay" tone="alipay" sublabel="payment rail" />
-                  <BrandChip label="Baidu Maps" tone="baidu" sublabel="map layer" />
-                </div>
-                <p style={{ marginTop: 14 }}><T mode={mode} en="Uber's ally, Baidu, mattered. But Tencent and Alibaba together controlled stronger payment and social distribution complements. That changed discovery, payment convenience, and political leverage." zh="Uber 不是完全沒有盟友，百度確實重要。但騰訊與阿里巴巴合起來，掌握了更強的支付與社交流量補充資源，這會直接改變分發效率、支付便利與政治槓桿。" /></p>
+                <h3 className="subhead"><Icon name="layers" size={16} color={PALETTE.teal} /><T mode={mode} en="How to read the battle correctly" zh="如何正確讀這場戰爭" /></h3>
+                <ul className="bullet-list">
+                  <li><T mode={mode} en="Do not reduce the story to subsidies alone. Subsidies accelerated takeoff, but the war was decided by whether activity could harden into durable structure." zh="不要把故事縮成補貼而已。補貼確實能加速起飛，但勝負其實取決於活動能否沉澱成耐久結構。" /></li>
+                  <li><T mode={mode} en="Do not treat maps, payments, and traffic as cosmetic complements. In ride hailing they are part of value delivery and adoption friction." zh="不要把地圖、支付與流量視為裝飾性補充資源。在叫車場景裡，它們本來就是價值傳遞與採用摩擦的一部分。" /></li>
+                  <li><T mode={mode} en="Do not treat regulation as external background. In this case it functioned as a mechanism that could freeze local incumbency into law." zh="也不要把監管當成外部背景音。在這個個案裡，它更像是一個能把本地在位優勢直接鎖進法律裡的機制。" /></li>
+                </ul>
               </div>
               <CityNetworkFigure mode={mode} />
             </div>
           </section>
-
           <section id="strengths">
             <SectionHeading
               mode={mode}
